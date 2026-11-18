@@ -1,0 +1,75 @@
+{
+  "_comment": "EXAMPLE ONLY — illustrates the deck_plan.json interface, not a formal case result. Replace paths/content with a real run.",
+  "template": null,
+  "title": "Sparse attention cuts long-context inference cost 3.2x (example)",
+  "language": "en",
+  "slides": [
+    {
+      "layout": "Title Slide",
+      "title": "Sparse attention cuts long-context inference cost 3.2x",
+      "bullets": ["LongLlama-70B · context 128k", "Chen et al., 2026 · group meeting"],
+      "notes": "Open with the latency pain the audience knows; this work trades 0.4% accuracy for a 3.2x speedup.",
+      "evidence": [
+        {"kind": "section", "id": "Abstract", "locator": "p.1", "quote": "we reduce inference latency by 3.2x at comparable accuracy (example quote)"}
+      ]
+    },
+    {
+      "layout": "Title and Content",
+      "title": "Dense attention dominates latency beyond 32k context",
+      "bullets": ["Latency grows ~quadratic with context", "At 128k: 92% of step time is attention"],
+      "notes": "Transition: everyone feels this in serving. Emphasize the 92% number — it motivates everything after.",
+      "evidence": [
+        {"kind": "figure", "id": "Fig. 1", "locator": "p.2 / §1", "quote": "attention accounts for 92% of per-step latency at 128k context (example quote)"}
+      ]
+    },
+    {
+      "layout": "Title and Content",
+      "title": "Idea: keep 8 global sink tokens, sparsify the rest",
+      "bullets": ["Sink tokens carry the softmax mass", "Block-sparse mask over the remaining keys"],
+      "picture": {"file": "work/fig_p3_0.png", "caption": "Fig. 2 (p.3): overview schematic (method illustration, not measured data)"},
+      "picture_right": true,
+      "notes": "If asked why sinks work: attention-mass analysis in §3.2; backup chart in backup deck B1.",
+      "evidence": [
+        {"kind": "figure", "id": "Fig. 2", "locator": "p.3 / §3.1", "quote": "we retain eight attention-sink tokens and mask the remaining keys block-wise (example quote)"}
+      ]
+    },
+    {
+      "layout": "Title and Content",
+      "title": "Accuracy holds within 0.4% across four benchmarks",
+      "bullets": ["Four long-context benchmarks", "Largest drop: 0.4% (QMSUM)"],
+      "table": {"columns": ["benchmark", "dense", "sparse"], "rows": [["QMSUM", "27.31", "26.94"], ["NarrativeQA", "24.10", "23.95"], ["SCRolls", "31.02", "30.88"], ["LongBench", "48.66", "48.41"]]},
+      "notes": "If pressed on QMSUM: the drop concentrates on very long summaries; cite the §5.2 ablation as backup.",
+      "evidence": [
+        {"kind": "table", "id": "Table 2", "locator": "p.6 / §5.1", "quote": "accuracy remains within 0.4% of the dense baseline across all four benchmarks (example quote)"}
+      ]
+    },
+    {
+      "layout": "Title and Content",
+      "title": "3.2x end-to-end speedup at 128k context",
+      "bullets": ["Wall-clock, batch 8, A100", "Speedup grows with context length"],
+      "picture": {"file": "work/fig_p7_0.png", "caption": "Fig. 5 (p.7): latency vs. context, seconds as published"},
+      "notes": "Close the loop with the opening pain: this is the serving-cost number. Transition to limitations.",
+      "evidence": [
+        {"kind": "figure", "id": "Fig. 5", "locator": "p.7 / §5.3", "quote": "end-to-end latency improves by 3.2x at 128k context on A100 GPUs (example quote)"}
+      ]
+    },
+    {
+      "layout": "Title and Content",
+      "title": "Limitation: recall-heavy tasks need dense attention",
+      "bullets": ["Needle-in-haystack recall drops 1.8%", "Training-free; combines with quantization"],
+      "notes": "Honest scope: recall-heavy workloads should stay dense or raise the sink budget; pointer to §6 discussion.",
+      "evidence": [
+        {"kind": "section", "id": "§6", "locator": "p.8", "quote": "recall-oriented tasks show the largest degradation, suggesting a higher sink budget (example quote)"}
+      ]
+    },
+    {
+      "layout": "Title and Content",
+      "title": "Takeaway: two things to remember",
+      "bullets": ["Attention sinks let you sparsify safely", "0.4% accuracy for 3.2x latency — worth it for serving"],
+      "notes": "End on the trade-off framing; invite questions on the ablation and the serving setup.",
+      "evidence": [
+        {"kind": "section", "id": "Conclusion", "locator": "p.8", "quote": "sink-preserving sparsity offers a practical accuracy-latency trade-off (example quote)"}
+      ]
+    }
+  ]
+}
