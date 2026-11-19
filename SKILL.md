@@ -5,6 +5,8 @@ description: "Turn a research paper (PDF) into a presentable, editable academic 
 
 # paper2slides — Paper → Academic Slide Deck with Evidence Mapping
 
+> **脚本路径**：本技能安装于 `/skills/weekly-skill/`，脚本绝对路径为 `/skills/weekly-skill/scripts/`（工作目录是 `/app/work`，不要用相对路径）。
+
 Convert a paper PDF into a defensible academic deck. The failure mode this skill exists to prevent: a deck that looks like slides but is really the paper chopped into paragraphs — storyline lost, figure numbers mismatched, numbers silently rewritten, template overridden, notes missing, export broken.
 
 **Method in one line:** extract the paper's structure with a script, plan the deck as a JSON page plan (one claim per page, each claim tied to evidence), then render deterministically through template placeholders and machine-check the result. Quality lives in the plan; layout stability lives in the script.
@@ -19,7 +21,7 @@ Convert a paper PDF into a defensible academic deck. The failure mode this skill
 ### Phase 1 — Extract the paper's structure (script, not eyeballing)
 
 ```bash
-python3 scripts/pdf_extract.py paper.pdf -o work/paper_structure.json
+python3 /skills/weekly-skill/scripts/pdf_extract.py paper.pdf -o work/paper_structure.json
 ```
 
 This yields pages, section headings (numbered + bold), figure/table caption inventory (label, page, first 220 chars), and abstract. Read `paper_structure.json` — do not re-read the raw PDF page by page. If PyMuPDF is missing: `pip install pymupdf`. If the PDF is scanned (few text lines per page), run an OCR pass and say so in `result.json.uncertainty`.
@@ -78,8 +80,8 @@ Cross-check each saved image against `paper_structure.json` captions (same page,
 ### Phase 3 — Inspect the template, then render (script, deterministic)
 
 ```bash
-python3 scripts/inspect_template.py template.pptx -o work/template_report.json
-python3 scripts/build_deck.py work/deck_plan.json -o output/slides.pptx --evidence-out output/evidence_map.json
+python3 /skills/weekly-skill/scripts/inspect_template.py template.pptx -o work/template_report.json
+python3 /skills/weekly-skill/scripts/build_deck.py work/deck_plan.json -o output/slides.pptx --evidence-out output/evidence_map.json
 ```
 
 - `inspect_template` lists layouts and placeholders. Set each slide's `layout` from this report — match content to real placeholders (title / body / picture). If no template is given, the builtin 16:9 default is used and `template_compliance` goes into `result.json`.
@@ -88,8 +90,8 @@ python3 scripts/build_deck.py work/deck_plan.json -o output/slides.pptx --eviden
 ### Phase 4 — Machine-check, then render previews
 
 ```bash
-python3 scripts/check_deck.py work/deck_plan.json output/slides.pptx --paper work/paper_structure.json -o work/check_report.json
-python3 scripts/render_preview.py output/slides.pptx --outdir output/previews
+python3 /skills/weekly-skill/scripts/check_deck.py work/deck_plan.json output/slides.pptx --paper work/paper_structure.json -o work/check_report.json
+python3 /skills/weekly-skill/scripts/render_preview.py output/slides.pptx --outdir output/previews
 ```
 
 `check_deck` verifies: titles are claims within budget, bullet density, notes are not copies, evidence completeness, figure/table ids exist in the paper, picture files exist, page count. Fix every `issues[]` entry in the **plan** and rebuild — do not hand-edit the .pptx (the plan is the reproducible source).
